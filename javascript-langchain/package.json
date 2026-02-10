@@ -11,8 +11,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "langchain": "^0.3.0",
-    "@langchain/openai": "^0.3.0",
+    "langchain": "^1.2.19",
+    "@langchain/openai": "^1.2.6",
     "@langchain/community": "^0.3.0",
     "dotenv": "^16.4.5"
   }

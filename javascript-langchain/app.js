@@ -1,5 +1,8 @@
 import { ChatOpenAI } from '@langchain/openai';
 import dotenv from 'dotenv';
+import { initializeAgentExecutorWithOptions } from "langchain/tools";
+import { Calculator } from "@langchain/community/tools/calculator";
+import { DynamicTool } from "@langchain/core/tools";
 
 dotenv.config({ path: './javascript-langchain/.env' });
 
@@ -24,18 +27,59 @@ async function main() {
         }
     });
 
-    // Define the test query
-    const query = "What is 25 * 4 + 10?";
 
-    // Correct the usage of the invoke method
-    chat.invoke([{ role: "user", content: query }])
-        .then((response) => {
-            // Print the response content
-            console.log("AI Response:", response.content);
-        })
-        .catch((error) => {
-            console.error("Error invoking the model:", error);
-        });
+    // Define tools for the agent
+    const tools = [
+    new Calculator(),
+    new DynamicTool({
+      name: "get_current_time",
+      description: "Returns the current date and time. Use this when you need to know what time it is.",
+      func: async () => {
+        return new Date().toString();
+      },
+    }),
+    new DynamicTool({
+      name: "reverse_string",
+      description: "Reverses a string. Input should be a single string.",
+      func: async (input) => {
+        return input.split("").reverse().join("");
+      },
+    }),
+    ];
+
+
+// Create the agent
+  const executor = await initializeAgentExecutorWithOptions(tools, model, {
+    agentType: "openai-functions",
+    verbose: true,
+    agentArgs: {
+      prefix: "You are a professional and helpful AI assistant. Provide succinct, accurate responses.",
+    },
+  });
+
+
+  // Example queries
+  const queries = [
+    "What time is it right now?",
+    "What is 25 * 4 + 10?",
+    "Reverse the string 'Hello World'",
+  ];
+
+  console.log("Running example queries:\n");
+
+  for (const query of queries) {
+    console.log(`\n📝 Query: ${query}`);
+    console.log("─".repeat(50));
+    
+    try {
+      const result = await executor.invoke({ input: query });
+      console.log(`\n✅ Result: ${result.output}\n`);
+    } catch (error) {
+      console.error(`❌ Error: ${error.message}\n`);
+    }
+  }
+
+  console.log("\n🎉 Agent demo complete!");
 }
 
 // Call the main function and handle errors

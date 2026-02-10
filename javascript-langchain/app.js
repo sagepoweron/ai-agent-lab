@@ -23,6 +23,19 @@ async function main() {
             apiKey: process.env.GITHUB_TOKEN
         }
     });
+
+    // Define the test query
+    const query = "What is 25 * 4 + 10?";
+
+    // Correct the usage of the invoke method
+    chat.invoke([{ role: "user", content: query }])
+        .then((response) => {
+            // Print the response content
+            console.log("AI Response:", response.content);
+        })
+        .catch((error) => {
+            console.error("Error invoking the model:", error);
+        });
 }
 
 // Call the main function and handle errors
